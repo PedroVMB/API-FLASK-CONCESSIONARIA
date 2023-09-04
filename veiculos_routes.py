@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from db import app, db, Veiculo
-
-
+from flask_cors import CORS
+CORS(app)
 
 
 @app.route('/veiculos', methods=['POST'])
