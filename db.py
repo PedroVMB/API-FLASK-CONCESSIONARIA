@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask import request, jsonify
 
 
 app = Flask(__name__)
@@ -40,4 +41,60 @@ class Veiculo(db.Model):
             'formas_de_pagamento': self.formas_de_pagamento
         }
 
-app.run()
+
+#Post Veiculos
+@app.route('/veiculos', methods=['POST'])
+def create_veiculo():
+    data = request.json
+    veiculo = Veiculo(**data)
+    db.session.add(veiculo)
+    db.session.commit()
+    return jsonify({'message': 'Veículo criado com sucesso!'}), 201
+
+#Get veiculos
+@app.route('/veiculos', methods=['GET'])
+def get_veiculos():
+    veiculos = Veiculo.query.all()
+    result = [veiculo.serialize() for veiculo in veiculos]
+    return jsonify(result)
+
+#Get veiculos por ID
+@app.route('/veiculos/<int:veiculo_id>', methods=['GET'])
+def get_veiculo(veiculo_id):
+    veiculo = Veiculo.query.get(veiculo_id)
+    if veiculo:
+        return jsonify(veiculo.serialize())
+    return jsonify({'message': 'Veículo não encontrado!'}), 404
+
+#Put veiculos
+@app.route('/veiculos/<int:veiculo_id>', methods=['PUT'])
+def update_veiculo(veiculo_id):
+    veiculo = Veiculo.query.get(veiculo_id)
+    if veiculo:
+        data = request.json
+        for key, value in data.items():
+            setattr(veiculo, key, value)
+        db.session.commit()
+        return jsonify({'message': 'Veículo atualizado com sucesso!'})
+    return jsonify({'message': 'Veículo não encontrado!'}), 404
+
+
+#Delete veiculos
+@app.route('/veiculos/<int:veiculo_id>', methods=['DELETE'])
+def delete_veiculo(veiculo_id):
+    veiculo = Veiculo.query.get(veiculo_id)
+    if veiculo:
+        db.session.delete(veiculo)
+        db.session.commit()
+        return jsonify({'message': 'Veículo excluído com sucesso!'})
+    return jsonify({'message': 'Veículo não encontrado!'}), 404
+
+@app.route('/veiculos', methods=['OPTIONS'])
+def options():
+    response = jsonify({'message': 'OPTIONS request handled successfully'})
+    response.headers['Access-Control-Allow-Origin'] = '*'  # Permitir todas as origens
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE'  # Permitir todos os métodos que você deseja
+    return response
+
+if __name__ == '__main__':
+    app.run(host='localhost', port=8080)
