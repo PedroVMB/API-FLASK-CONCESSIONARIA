@@ -7,8 +7,6 @@ from flask import request, jsonify
 
 app = Flask(__name__)
 CORS(app)
-
-
 # Configuração do banco de dados MySQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root123@localhost:3306/concessionaria'
 db = SQLAlchemy(app)
@@ -89,12 +87,6 @@ def delete_veiculo(veiculo_id):
         return jsonify({'message': 'Veículo excluído com sucesso!'})
     return jsonify({'message': 'Veículo não encontrado!'}), 404
 
-@app.route('/veiculos', methods=['OPTIONS'])
-def options():
-    response = jsonify({'message': 'OPTIONS request handled successfully'})
-    response.headers['Access-Control-Allow-Origin'] = '*'  # Permitir todas as origens
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE'  # Permitir todos os métodos que você deseja
-    return response
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8080)
